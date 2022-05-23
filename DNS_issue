@@ -1,0 +1,87 @@
+Troubleshooting network issues
+
+This course is not approved or sponsored by Red Hat.
+Introduction
+
+In this exercise, you will need to troubleshoot and resolve connectivity issues to a web server.
+
+Server1 (10.0.1.10) is running Apache.
+
+Server2 (10.0.1.11) must be able to view Server1's Apache content via http://ip-10.0.1.10.ec2.internal using elinks (not currently installed).
+Solution
+
+Start by logging in to the lab servers using the credentials provided on the hands-on lab page:
+ssh cloud_user@PUBLIC_IP_ADDRESS
+
+Become the root user:
+sudo su -
+
+Be sure to log in to both Server1 and Server2 in separate tabs or windows.
+Verify Server1
+
+    Verify Server1 is running Apache:
+     systemctl status httpd
+
+    Verify Apache is listening on port 80:
+     ss -lntp | grep 80
+
+    Verify the content can be accessed locally:
+     curl localhost
+
+    Verify the firewall is permitting port 80 traffic:
+     firewall-cmd --list-all
+
+    Permit inbound traffic to Apache:
+     firewall-cmd --permanent --add-service=http
+
+    Reload the firewall to pickup the change:
+     firewall-cmd --reload
+
+Verify Server2
+
+On Server2 (10.0.1.11)
+
+    Attempt to pull the web content from Server1 via hostname:
+     curl ip-10-0-1-10.ec2.internal
+
+    Attempt to pull the web content from Server1 via IP
+     curl 10.0.1.10
+
+    Check to see what DNS hosts are being used:
+     cat /etc/resolv.conf
+
+    Verify resolution via the specified host:
+     dig @10.0.0.2 ip-10-0-1-10.ec2.internal
+
+    Verify /etc/nsswitch.conf:
+     vim /etc/nsswitch.conf
+
+    Add dns to the hosts: line. It should look like this:
+     hosts:	files dns myhostname
+
+    Save and close the file:
+     :wq
+
+    Attempt to pull the web content from Server1 via hostname:
+     curl ip-10-0-1-10.ec2.internal
+
+    Ping ip-10-0-1-10.ec2.internal:
+     ping ip-10-0-1-10.ec2.internal
+
+    Review /etc/hosts:
+    vim /etc/hosts
+
+    Remove the following line:
+    10.0.1.1	ip-10-0-1-10.ec2.internal
+
+    Save and close the file:
+    :wq
+
+    Attempt to pull the web content from Server1 via hostname:
+    curl ip-10-0-1-10.ec2.internal
+
+    Install elinks:
+    yum install -y elinks
+
+    Use elinks to view the content:
+    links -dump http://ip-10-0-1-10.ec2.internal
